@@ -305,4 +305,4 @@ def evid(data_p=data_p,data_v=data_v,N_samples=2000):
         if i%100==0:
             print 'sampling...: %d' %i
     
-    return evd_field,evd_vb, evd_f_max, evd_v_max
+    return evd_field,evd_vb, evd_f_max, evd_v_maxn
