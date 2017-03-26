@@ -3,3 +3,4 @@
 *.png
 *checkpoint*
 *~
+*.DS_Store

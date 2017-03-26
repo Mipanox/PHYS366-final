@@ -121,7 +121,7 @@ def xy_to_EB(cx,cy,plot=False):
     
     return E1, B1, Epsd, Bpsd
 
-def tot_spec(E1,B1,plot=False):
+def tot_spec(E1,B1,plot=False,label='Total power',style='b'):
     """
     Total (combined) power spectrum (radial) of the E/B-modes
 
@@ -134,6 +134,11 @@ def tot_spec(E1,B1,plot=False):
     Options:
     - plot : bool
       See descriptions in 'QU_to_EB'
+    - label : string
+      Label of the spectrum. Default to "Total power"
+    - style : string
+      Plotting option for matplotlib pyplot lines
+      Default to "b"
 
     Returns:
     - Tot : numpy ndarray
@@ -152,8 +157,8 @@ def tot_spec(E1,B1,plot=False):
     Tpsd[1] = Tpsd[1]/np.trapz(Tpsd[1],Tpsd[0])
     
     if plot==True:
-        plt.figure(figsize=(9,9))
-        plt.plot(Tpsd[0],Tpsd[1],'b',label='Total power')
+        #plt.figure(figsize=(9,9))
+        plt.plot(Tpsd[0],Tpsd[1],style,label=label)
         plt.yscale('log'); plt.xscale('log'); 
         plt.xlabel('Spectral Frequency', fontsize=24)
         plt.ylabel('Radial Power', fontsize=24)
