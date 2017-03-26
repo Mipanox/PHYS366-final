@@ -17,7 +17,7 @@ from astropy.utils.data import get_readable_fileobj
 from astropy.io import fits
 from astropy.convolution import convolve_fft, Gaussian2DKernel
 import numpy as np
-from scipy.fftpack import ifft
+from scipy.fftpack import ifft2, ifft
 from scipy import signal
 import matplotlib.pyplot as plt
 import corner
