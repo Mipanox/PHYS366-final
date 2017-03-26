@@ -125,17 +125,17 @@ def tot_spec(E1,B1,plot=False):
     """
     Total (combined) power spectrum (radial) of the E/B-modes
 
-    Inputs
+    Inputs:
     - E1 : numpy ndarray
       The E-mode component
     - B1 : numpy ndarray
       The B-mode component
 
-    Options
+    Options:
     - plot : bool
       See descriptions in 'QU_to_EB'
 
-    Returns
+    Returns:
     - Tot : numpy ndarray
       Total 2D power spectral density
 
