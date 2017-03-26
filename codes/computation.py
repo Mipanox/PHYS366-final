@@ -4,6 +4,7 @@ Essential codes for computing
 - PSD and RAPS
 - CSD
 - chi-square distances between two PSDs
+- Evidence
 """
 
 def QU_to_EB(Q,U,conv=False,std=0.3,plot=False):
@@ -217,3 +218,91 @@ def chi_sq(psd1,psd2):
 
     ## discrete integration
     return np.trapz((psd1_-psd2_)**2,psd1[0])
+
+
+############
+# Evidence #
+
+def evid(data_p=data_p,data_v=data_v,N_samples=2000):
+    """
+    Calculate the 'evidences' of models:
+    (1) Frequentist: randomly "observing" vector & B-field many times
+        measure how well they match
+    (2) Bayesian evidence from sampling prior weights in [0,1]
+
+    Inputs:
+    - data_p : the Stokes Q, U maps
+    - data_v : the vector field PA map
+
+    Paramaters:
+    - N_samples: integer
+      How many priors / random fields to draw?
+
+    Returns:
+    - evd_field : float
+      Evidence of P(obs_B|M) for observed B-field configuration
+    
+    - evd_vb : float
+      Evidence for the similarity between the two fields
+    
+    - evd_f_max : float
+      The maximum likelihood of the model
+
+    - evd_v_max : float
+      Maximum likelihood for the randomly "observed" two fields
+    """
+    ## initialize
+    evd_field, evd_vb = 0., 0.  
+    evd_f_max, evd_v_max = 0., 0.
+
+    #- Generate uniform weights w1,w2,w3=U(0,1)
+    ## randomly draw 2 numbers in [0,1]
+    w1  = np.random.rand(N_samples)
+    w2_ = np.random.rand(N_samples)
+    w3_ = np.ones(N_samples)
+
+    ## sort them and subtract to get the divisions
+    stack = np.sort(np.vstack((w1,w2_,w3_)),axis=0)
+
+    w2 = stack[1,:]-stack[0,:]
+    w3 = stack[2,:]-stack[1,:]
+
+    ## put them together
+    w_prior = np.vstack((w1,w2,w3))
+
+    #- Sum up the likelihoods...
+    for i in range(N_samples):
+        ### vector field
+        rdm_d = rdm_data_v(data_v)
+        data_x, data_y = pa2vxvy(rdm_d)
+        E1v, B1v, _, _ = xy_to_EB(data_x,data_y)
+        datav_Tpsd = tot_spec(E1v,B1v)
+    
+        ### B-field
+        rdm_dQ,rdm_dU = rdm_data_p(data_p)
+        Ep1, Bp1, _, _ = QU_to_EB(rdm_dQ,rdm_dU)
+        datap_Tpsd = tot_spec(Ep1,Bp1)
+        
+        weights = w_prior[:,i]
+        ff = per_sum(size=data_v.shape,weights=weights,
+                     seed=np.random.randint(np.iinfo(np.int32).max))
+    
+        ff_x, ff_y = pa2vxvy(ff)
+        E1f, B1f, _, _ = xy_to_EB(ff_x,ff_y)
+        ff_Tpsd = tot_spec(E1f,B1f)
+    
+        evd_f_new = np.exp(-0.5*chi_sq(datap_Tpsd[1],ff_Tpsd[1]))
+        evd_v_new = np.exp(-0.5*chi_sq(datap_Tpsd[1],datav_Tpsd[1]))
+        
+        evd_field += evd_f_new
+        evd_vb    += evd_v_new
+
+        ## update max.
+        if evd_f_new > evd_f_max: evd_f_max = evd_f_new
+        if evd_v_new > evd_v_max: evd_v_max = evd_v_new
+
+        ## because this can be slow, print out status...
+        if i%100==0:
+            print 'sampling...: %d' %i
+    
+    return evd_field,evd_vb, evd_f_max, evd_v_max
