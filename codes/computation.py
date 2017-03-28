@@ -222,7 +222,7 @@ def chi_sq(psd1,psd2):
 
 ############
 # Evidence #
-
+data_p,data_v = [],[]
 def evid(data_p=data_p,data_v=data_v,N_samples=2000):
     """
     Calculate the 'evidences' of models:
